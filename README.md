@@ -1,6 +1,6 @@
 # Maptastic
 
-Mobile map app with Expo, Expo Router, RNMapbox, MMKV, and Tamagui.
+Local-first mobile map app.
 
 ## Getting started
 
