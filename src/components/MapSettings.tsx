@@ -1,0 +1,237 @@
+import { Button } from "./Button";
+import { Backdrop, SheetBackground, SheetHandle } from "./SheetChrome";
+import { BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import type { RefObject } from "react";
+import { Switch } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { styled, useTheme, H4, Paragraph, XStack, YStack } from "tamagui";
+import {
+  mapStyles,
+  type BooleanSetting,
+  type MapSettings,
+  type useMapSettings,
+} from "../hooks/useMapSettings";
+
+const SheetButton = styled(Button, {
+  bg: "buttonBackground",
+  color: "color",
+});
+
+const snapPoints = ["60%", "99%"];
+const overlays: { key: BooleanSetting; label: string; detail: string }[] = [
+  {
+    key: "terrain",
+    label: "3D terrain",
+    detail: "Elevation relief; tilt the map to explore.",
+  },
+  {
+    key: "hillshade",
+    label: "Hillshade",
+    detail: "Shaded relief to reveal slopes and ridges.",
+  },
+  {
+    key: "contours",
+    label: "Elevation contours",
+    detail: "Contour lines and elevations in meters.",
+  },
+  {
+    key: "traffic",
+    label: "Live traffic",
+    detail: "Road congestion where coverage is available.",
+  },
+  {
+    key: "buildings",
+    label: "3D buildings",
+    detail: "Building extrusions at neighborhood zoom levels.",
+  },
+];
+const display: { key: BooleanSetting; label: string }[] = [
+  { key: "globe", label: "Globe projection" },
+  { key: "compass", label: "Compass" },
+  { key: "scale", label: "Distance scale" },
+];
+
+type Props = ReturnType<typeof useMapSettings> & {
+  sheetRef: RefObject<BottomSheetModal | null>;
+  onTilt: () => void;
+};
+
+export const MapSettingsSheet = ({
+  sheetRef,
+  settings,
+  update,
+  reset,
+  onTilt,
+}: Props) => {
+  const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const toggleRow = ({
+    key,
+    label,
+    detail,
+  }: {
+    key: BooleanSetting;
+    label: string;
+    detail?: string;
+  }) => {
+    return (
+      <XStack key={key} ai="center" jc="space-between" gap="4" py="3">
+        <YStack f={1} gap="1">
+          <Paragraph fw="600">{label}</Paragraph>
+          {detail ? (
+            <Paragraph fs={13} c="placeholder-color">
+              {detail}
+            </Paragraph>
+          ) : null}
+        </YStack>
+        <Switch
+          accessibilityLabel={label}
+          value={settings[key]}
+          onValueChange={(value) => update(key, value)}
+          trackColor={{
+            false: theme["border-color"].val,
+            true: theme["accent-background"].val,
+          }}
+          ios_backgroundColor={theme["border-color"].val}
+        />
+      </XStack>
+    );
+  };
+  return (
+    <BottomSheetModal
+      ref={sheetRef}
+      snapPoints={snapPoints}
+      enableDynamicSizing={false}
+      enablePanDownToClose
+      backdropComponent={Backdrop}
+      backgroundComponent={SheetBackground}
+      handleComponent={SheetHandle}
+      topInset={insets.top}
+    >
+      <BottomSheetScrollView>
+        <YStack bg="background" px="5" pt="2" pb={insets.bottom + 24} gap="5">
+          <YStack gap="3">
+            <H4>Base</H4>
+            <XStack wrap="wrap" gap="2">
+              {Object.entries(mapStyles).map(([key, option]) => (
+                <SheetButton
+                  key={key}
+                  size="sm"
+                  bg="buttonBackground"
+                  bw={1}
+                  bc={
+                    settings.style === key
+                      ? "accent-background"
+                      : "border-color"
+                  }
+                  c="color"
+                  accessibilityState={{ selected: settings.style === key }}
+                  onPress={() => update("style", key as MapSettings["style"])}
+                >
+                  {option.label}
+                </SheetButton>
+              ))}
+            </XStack>
+          </YStack>
+          {settings.style === "standard" ? (
+            <YStack gap="2">
+              <H4>Standard appearance</H4>
+              <Paragraph c="placeholder-color">
+                Lighting and labels for the Standard basemap.
+              </Paragraph>
+              <XStack gap="2" wrap="wrap">
+                {(["dawn", "day", "dusk", "night"] as const).map((value) => (
+                  <SheetButton
+                    key={value}
+                    size="sm"
+                    bg="buttonBackground"
+                    bw={1}
+                    bc={
+                      settings.lighting === value
+                        ? "accent-background"
+                        : "border-color"
+                    }
+                    accessibilityState={{
+                      selected: settings.lighting === value,
+                    }}
+                    onPress={() => update("lighting", value)}
+                  >
+                    {value}
+                  </SheetButton>
+                ))}
+              </XStack>
+              {(
+                [
+                  { key: "pois", label: "Points of interest" },
+                  { key: "transit", label: "Transit labels" },
+                  { key: "places", label: "Place names" },
+                  { key: "roads", label: "Road labels" },
+                ] as const
+              ).map(toggleRow)}
+            </YStack>
+          ) : null}
+          <YStack>
+            <H4>Layers</H4>
+            {overlays.map(toggleRow)}
+            {settings.terrain ? (
+              <YStack gap="2" py="3">
+                <Paragraph fw="600">Terrain exaggeration</Paragraph>
+                <XStack gap="2">
+                  {[1, 1.5, 2, 3].map((value) => (
+                    <SheetButton
+                      key={value}
+                      size="sm"
+                      bg="buttonBackground"
+                      bw={1}
+                      bc={
+                        settings.exaggeration === value
+                          ? "accent-background"
+                          : "border-color"
+                      }
+                      accessibilityState={{
+                        selected: settings.exaggeration === value,
+                      }}
+                      onPress={() => update("exaggeration", value)}
+                    >
+                      {value}×
+                    </SheetButton>
+                  ))}
+                </XStack>
+              </YStack>
+            ) : null}
+            <SheetButton onPress={onTilt}>
+              Switch between flat and tilted view
+            </SheetButton>
+          </YStack>
+          <YStack>
+            <H4>Display</H4>
+            {display.map(toggleRow)}
+            <Paragraph fw="600" py="3">
+              Distance units
+            </Paragraph>
+            <XStack gap="2" wrap="wrap">
+              {(["metric", "imperial", "nautical"] as const).map((unit) => (
+                <SheetButton
+                  key={unit}
+                  size="sm"
+                  bg="buttonBackground"
+                  bw={1}
+                  bc={
+                    settings.units === unit
+                      ? "accent-background"
+                      : "border-color"
+                  }
+                  accessibilityState={{ selected: settings.units === unit }}
+                  onPress={() => update("units", unit)}
+                >
+                  {unit}
+                </SheetButton>
+              ))}
+            </XStack>
+          </YStack>
+          <SheetButton onPress={reset}>Reset all settings</SheetButton>
+        </YStack>
+      </BottomSheetScrollView>
+    </BottomSheetModal>
+  );
+};

@@ -1,0 +1,9 @@
+.git/
+node_modules/
+ios/
+android/
+.expo/
+dist/
+web-build/
+.env*
+package-lock.json
