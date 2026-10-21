@@ -6,7 +6,7 @@ Local-first mobile map app.
 
 1. Run `npm install`.
 2. Copy `.env.example` to `.env.local` and set `EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN` to your public Mapbox token (`pk.*`). Public Expo variables are included in the client bundle; never put secret tokens there.
-3. Create an iOS or Android development build with EAS, or use `npx expo run:ios` / `npx expo run:android` locally.
+3. Create an iOS or Android development build with `npx expo run:ios` / `npx expo run:android`.
 4. Run `npm start` and open the development build.
 
 ## Structure
