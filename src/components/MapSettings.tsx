@@ -2,9 +2,18 @@ import { Button } from "./Button";
 import { Backdrop, SheetBackground, SheetHandle } from "./SheetChrome";
 import { BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import type { RefObject } from "react";
+import type { useRadar } from "../hooks/useRadar";
 import { Switch } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styled, useTheme, H4, Paragraph, XStack, YStack } from "tamagui";
+import {
+  styled,
+  useTheme,
+  H4,
+  Paragraph,
+  Select,
+  XStack,
+  YStack,
+} from "tamagui";
 import {
   mapStyles,
   type BooleanSetting,
@@ -20,29 +29,34 @@ const SheetButton = styled(Button, {
 const snapPoints = ["60%", "99%"];
 const overlays: { key: BooleanSetting; label: string; detail: string }[] = [
   {
+    key: "radar",
+    label: "Rain radar",
+    detail: "NOAA/NWS precipitation radar · contiguous U.S.",
+  },
+  {
     key: "terrain",
     label: "3D terrain",
-    detail: "Elevation relief; tilt the map to explore.",
+    detail: "Elevation relief; tilt the map to explore",
   },
   {
     key: "hillshade",
     label: "Hillshade",
-    detail: "Shaded relief to reveal slopes and ridges.",
+    detail: "Shaded relief to reveal slopes and ridges",
   },
   {
     key: "contours",
     label: "Elevation contours",
-    detail: "Contour lines and elevations in meters.",
+    detail: "Contour lines and elevations",
   },
   {
     key: "traffic",
     label: "Live traffic",
-    detail: "Road congestion where coverage is available.",
+    detail: "Road congestion where coverage is available",
   },
   {
     key: "buildings",
     label: "3D buildings",
-    detail: "Building extrusions at neighborhood zoom levels.",
+    detail: "Building extrusions at neighborhood zoom levels",
   },
 ];
 const display: { key: BooleanSetting; label: string }[] = [
@@ -54,6 +68,7 @@ const display: { key: BooleanSetting; label: string }[] = [
 type Props = ReturnType<typeof useMapSettings> & {
   sheetRef: RefObject<BottomSheetModal | null>;
   onTilt: () => void;
+  radar: ReturnType<typeof useRadar>;
 };
 
 export const MapSettingsSheet = ({
@@ -62,6 +77,7 @@ export const MapSettingsSheet = ({
   update,
   reset,
   onTilt,
+  radar,
 }: Props) => {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
@@ -112,26 +128,42 @@ export const MapSettingsSheet = ({
         <YStack bg="background" px="5" pt="2" pb={insets.bottom + 24} gap="5">
           <YStack gap="3">
             <H4>Base</H4>
-            <XStack wrap="wrap" gap="2">
-              {Object.entries(mapStyles).map(([key, option]) => (
-                <SheetButton
-                  key={key}
-                  size="sm"
+            <Select<MapSettings["style"]>
+              value={settings.style}
+              onValueChange={(style) => update("style", style)}
+              renderValue={(style) => mapStyles[style].label}
+            >
+              <Select.Trigger
+                bg="buttonBackground"
+                bc="border-color"
+                minH={52}
+                accessibilityLabel="Base map"
+              >
+                <Select.Value c="color" />
+                <Select.Icon />
+              </Select.Trigger>
+              <Select.Content>
+                <Select.Viewport
                   bg="buttonBackground"
                   bw={1}
-                  bc={
-                    settings.style === key
-                      ? "accent-background"
-                      : "border-color"
-                  }
-                  c="color"
-                  accessibilityState={{ selected: settings.style === key }}
-                  onPress={() => update("style", key as MapSettings["style"])}
+                  bc="border-color"
+                  rounded={12}
+                  maxH={400}
+                  bs="none"
                 >
-                  {option.label}
-                </SheetButton>
-              ))}
-            </XStack>
+                  <Select.Group>
+                    {Object.entries(mapStyles).map(([key, option]) => (
+                      <Select.Item key={key} value={key} minH={48}>
+                        <Select.ItemText c="color">
+                          {option.label}
+                        </Select.ItemText>
+                        <Select.ItemIndicator ml="auto" />
+                      </Select.Item>
+                    ))}
+                  </Select.Group>
+                </Select.Viewport>
+              </Select.Content>
+            </Select>
           </YStack>
           {settings.style === "standard" ? (
             <YStack gap="2">
@@ -173,6 +205,48 @@ export const MapSettingsSheet = ({
           <YStack>
             <H4>Layers</H4>
             {overlays.map(toggleRow)}
+            {settings.radar ? (
+              <YStack gap="2" py="3">
+                <Paragraph fw="600">Radar opacity</Paragraph>
+                <XStack gap="2" wrap="wrap">
+                  {[0.35, 0.65, 1].map((opacity) => (
+                    <SheetButton
+                      key={opacity}
+                      size="sm"
+                      bw={1}
+                      bc={
+                        settings.radarOpacity === opacity
+                          ? "accent-background"
+                          : "border-color"
+                      }
+                      accessibilityLabel={`Radar opacity ${Math.round(opacity * 100)} percent`}
+                      accessibilityState={{
+                        selected: settings.radarOpacity === opacity,
+                      }}
+                      onPress={() => update("radarOpacity", opacity)}
+                    >
+                      {Math.round(opacity * 100)}%
+                    </SheetButton>
+                  ))}
+                </XStack>
+                <Paragraph
+                  fs={13}
+                  c="placeholder-color"
+                  accessibilityLiveRegion="polite"
+                >
+                  {radar.error
+                    ? "Radar refresh unavailable. Retrying automatically."
+                    : radar.loading
+                      ? "Refreshing radar…"
+                      : "Refreshes every 2 minutes"}
+                </Paragraph>
+                {radar.time ? (
+                  <Paragraph fs={13} c="placeholder-color">
+                    NOAA/NWS · {new Date(radar.time).toLocaleString()}
+                  </Paragraph>
+                ) : null}
+              </YStack>
+            ) : null}
             {settings.terrain ? (
               <YStack gap="2" py="3">
                 <Paragraph fw="600">Terrain exaggeration</Paragraph>

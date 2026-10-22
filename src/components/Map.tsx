@@ -26,6 +26,7 @@ import { mapStyles, useMapSettings } from "../hooks/useMapSettings";
 import { MapOverlays } from "./MapOverlays";
 import { MapSettingsSheet } from "./MapSettings";
 import { useCenterOnUser } from "../hooks/useCenterOnUser";
+import { useRadar } from "../hooks/useRadar";
 
 import { readMapCamera, saveMapCamera } from "../lib/mapCamera";
 
@@ -79,6 +80,7 @@ export const Map = () => {
   );
   const mapSettings = useMapSettings();
   const { settings } = mapSettings;
+  const radar = useRadar(settings.radar);
   const toggleTilt = () => {
     cameraRef.current?.setCamera({
       pitch: tilted ? 0 : 60,
@@ -198,7 +200,7 @@ export const Map = () => {
         pitchEnabled={settings.pitch}
       >
         <Mapbox.Camera ref={cameraRef} defaultSettings={initialCamera} />
-        <MapOverlays settings={settings} />
+        <MapOverlays settings={settings} radarTime={radar.time} />
         {waypoints.map((waypoint, index) => (
           <Mapbox.PointAnnotation
             key={`${index}-${waypoint.join(",")}`}
@@ -446,6 +448,7 @@ export const Map = () => {
         sheetRef={sheetRef}
         {...mapSettings}
         onTilt={toggleTilt}
+        radar={radar}
       />
     </YStack>
   );

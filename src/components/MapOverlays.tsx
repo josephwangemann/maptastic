@@ -1,8 +1,15 @@
 import Mapbox from "@rnmapbox/maps";
 import { useTheme } from "tamagui";
 import type { MapSettings } from "../hooks/useMapSettings";
+import { radarTileUrl } from "../lib/radar";
 
-export const MapOverlays = ({ settings }: { settings: MapSettings }) => {
+export const MapOverlays = ({
+  settings,
+  radarTime,
+}: {
+  settings: MapSettings;
+  radarTime: string | null;
+}) => {
   const theme = useTheme();
   return (
     <>
@@ -63,7 +70,11 @@ export const MapOverlays = ({ settings }: { settings: MapSettings }) => {
             minZoomLevel={12}
             style={{
               symbolPlacement: "line",
-              textField: ["concat", ["to-string", ["get", "ele"]], " m"],
+              textField: [
+                "concat",
+                ["to-string", ["round", ["/", ["get", "ele"], 0.3048]]],
+                " ft",
+              ],
               textSize: 10,
               textColor: theme.contourLabel.val,
               textHaloColor: theme.mapHalo.val,
@@ -130,6 +141,25 @@ export const MapOverlays = ({ settings }: { settings: MapSettings }) => {
             }}
           />
         </Mapbox.VectorSource>
+      ) : null}
+      {settings.radar && radarTime ? (
+        <Mapbox.RasterSource
+          key={radarTime}
+          id="app-radar"
+          tileUrlTemplates={[radarTileUrl(radarTime)]}
+          tileSize={256}
+          maxZoomLevel={8}
+          sourceBounds={[-130, 20, -60, 55]}
+          attribution='<a href="https://radar.weather.gov/">NOAA/NWS radar</a>'
+        >
+          <Mapbox.RasterLayer
+            id="app-radar-layer"
+            style={{
+              rasterOpacity: settings.radarOpacity,
+              rasterFadeDuration: 0,
+            }}
+          />
+        </Mapbox.RasterSource>
       ) : null}
     </>
   );

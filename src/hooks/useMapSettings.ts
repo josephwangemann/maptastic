@@ -25,6 +25,8 @@ export const defaultMapSettings = {
   exaggeration: 1,
   hillshade: false,
   contours: false,
+  radar: false,
+  radarOpacity: 0.65,
   traffic: false,
   buildings: false,
   globe: true,
