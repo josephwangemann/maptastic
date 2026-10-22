@@ -27,37 +27,13 @@ const SheetButton = styled(Button, {
 });
 
 const snapPoints = ["60%", "99%"];
-const overlays: { key: BooleanSetting; label: string; detail: string }[] = [
-  {
-    key: "radar",
-    label: "Rain radar",
-    detail: "NOAA/NWS precipitation radar · contiguous U.S.",
-  },
-  {
-    key: "terrain",
-    label: "3D terrain",
-    detail: "Elevation relief; tilt the map to explore",
-  },
-  {
-    key: "hillshade",
-    label: "Hillshade",
-    detail: "Shaded relief to reveal slopes and ridges",
-  },
-  {
-    key: "contours",
-    label: "Elevation contours",
-    detail: "Contour lines and elevations",
-  },
-  {
-    key: "traffic",
-    label: "Live traffic",
-    detail: "Road congestion where coverage is available",
-  },
-  {
-    key: "buildings",
-    label: "3D buildings",
-    detail: "Building extrusions at neighborhood zoom levels",
-  },
+const overlays: { key: BooleanSetting; label: string }[] = [
+  { key: "radar", label: "Rain radar" },
+  { key: "terrain", label: "3D terrain" },
+  { key: "hillshade", label: "Hillshade" },
+  { key: "contours", label: "Elevation contours" },
+  { key: "traffic", label: "Live traffic" },
+  { key: "buildings", label: "3D buildings" },
 ];
 const display: { key: BooleanSetting; label: string }[] = [
   { key: "globe", label: "Globe projection" },
@@ -84,22 +60,15 @@ export const MapSettingsSheet = ({
   const toggleRow = ({
     key,
     label,
-    detail,
   }: {
     key: BooleanSetting;
     label: string;
-    detail?: string;
   }) => {
     return (
       <XStack key={key} ai="center" jc="space-between" gap="4" py="3">
-        <YStack f={1} gap="1">
-          <Paragraph fw="600">{label}</Paragraph>
-          {detail ? (
-            <Paragraph fs={13} c="placeholder-color">
-              {detail}
-            </Paragraph>
-          ) : null}
-        </YStack>
+        <Paragraph f={1} fw="600">
+          {label}
+        </Paragraph>
         <Switch
           accessibilityLabel={label}
           value={settings[key]}
