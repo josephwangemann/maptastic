@@ -35,9 +35,9 @@ const SheetButton = styled(Button, {
   bw: 1,
   bc: "border-color",
 });
-const saveSnapPoints = ["50%", "90%"];
-const listSnapPoints = ["60%", "90%"];
-const colorNames = ["Blue", "Red", "Orange", "Green", "Purple", "White"];
+const saveSnapPoints = ["50%", "99%"];
+const listSnapPoints = ["60%", "99%"];
+const colorNames = ["Sky blue", "Rose", "Amber", "Teal", "Lavender", "Ice"];
 
 type SaveProps = {
   sheetRef: RefObject<BottomSheetModal | null>;
@@ -64,18 +64,18 @@ export const SaveWaypointSheet = ({
   onDismiss,
   onSave,
 }: SaveProps) => {
-  const saving = useRef(false);
+  const savingRef = useRef(false);
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const save = () => {
-    if (!coordinates || !name.trim() || saving.current) return;
-    saving.current = true;
+    if (!coordinates || !name.trim() || savingRef.current) return;
+    savingRef.current = true;
     try {
       onSave(name, coordinates, color);
       Keyboard.dismiss();
       sheetRef.current?.dismiss();
     } catch {
-      saving.current = false;
+      savingRef.current = false;
       Alert.alert("Unable to save waypoint", "Please try again.");
     }
   };
@@ -84,7 +84,7 @@ export const SaveWaypointSheet = ({
       ref={sheetRef}
       snapPoints={saveSnapPoints}
       enableDynamicSizing={false}
-      backdropComponent={Backdrop}
+      backdropComponent={ClearBackdrop}
       backgroundComponent={SheetBackground}
       handleComponent={SheetHandle}
       topInset={insets.top}
@@ -99,7 +99,7 @@ export const SaveWaypointSheet = ({
       }}
       onDismiss={() => {
         Keyboard.dismiss();
-        saving.current = false;
+        savingRef.current = false;
         onDismiss();
       }}
     >
@@ -207,7 +207,7 @@ export const WaypointListSheet = ({
         ListHeaderComponent={
           <XStack px="5" py="3" ai="center" jc="space-between">
             <H4>
-              Waypoints{waypoints.length > 0 ? ` · ${waypoints.length}` : ""}
+              Waypoints{waypoints.length > 0 ? ` (${waypoints.length})` : ""}
             </H4>
           </XStack>
         }

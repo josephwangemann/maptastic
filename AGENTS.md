@@ -35,6 +35,8 @@ Run lint and typecheck before declaring any task done.
 
 ## Code conventions
 
+- Use concise names ending in `Ref` for all `useRef` variables (for example, `sheetRef` or `cameraRef`).
+- Bottom sheet snap points must always include `"99%"`; never use `"90%"`.
 - Use arrow functions by default, including components, hooks, and callbacks. Use function declarations only for a specific technical reason and document that reason.
 - Use PascalCase for component filenames and camelCase for hooks and utilities; retain filenames required by frameworks and tools.
 - Use Tamagui theme colors exclusively; do not hardcode colors or use StyleSheet.

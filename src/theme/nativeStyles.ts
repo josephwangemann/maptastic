@@ -2,6 +2,11 @@ import type { TextStyle, ViewStyle } from "react-native";
 
 import { appShorthands } from "./shorthands";
 
+export const northArrowRotation = (heading: number): ViewStyle => {
+  "worklet";
+  return { transform: [{ rotate: `${-heading}deg` }] };
+};
+
 const keys = {
   ...appShorthands,
   w: "width",

@@ -6,12 +6,12 @@ export type Waypoint = [
 ];
 
 export const pinColors = [
-  "pinBlue",
-  "pinRed",
-  "pinOrange",
-  "pinGreen",
-  "pinPurple",
-  "pinWhite",
+  "pinSky",
+  "pinRose",
+  "pinAmber",
+  "pinTeal",
+  "pinLavender",
+  "pinIce",
 ] as const;
 
 export const isWaypoint = (value: unknown): value is Waypoint =>

@@ -3,32 +3,31 @@ import * as Location from "expo-location";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { Alert, Linking } from "react-native";
 
-export const useCenterOnUser = (camera: RefObject<Camera | null>) => {
+export const useCenterOnUser = (cameraRef: RefObject<Camera | null>) => {
   const [locating, setLocating] = useState(false);
   const [showUserLocation, setShowUserLocation] = useState(false);
-  const busy = useRef(false);
-  const mounted = useRef(true);
+  const busyRef = useRef(false);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-    mounted.current = true;
+    mountedRef.current = true;
     return () => {
-      mounted.current = false;
+      mountedRef.current = false;
     };
   }, []);
 
   const centerOnUser = async () => {
-    if (busy.current) return;
-    busy.current = true;
+    if (busyRef.current) return;
+    busyRef.current = true;
     setLocating(true);
     let timeout: ReturnType<typeof setTimeout> | undefined;
 
     try {
-      // All permission and location calls intentionally live inside the press handler.
       let permission = await Location.getForegroundPermissionsAsync();
       if (!permission.granted && permission.canAskAgain) {
         permission = await Location.requestForegroundPermissionsAsync();
       }
-      if (!mounted.current) return;
+      if (!mountedRef.current) return;
       if (!permission.granted) {
         setShowUserLocation(false);
         if (!permission.canAskAgain) {
@@ -72,16 +71,16 @@ export const useCenterOnUser = (camera: RefObject<Camera | null>) => {
           );
         }),
       ]);
-      if (!mounted.current) return;
+      if (!mountedRef.current) return;
       setShowUserLocation(true);
-      camera.current?.setCamera({
+      cameraRef.current?.setCamera({
         centerCoordinate: [position.coords.longitude, position.coords.latitude],
         zoomLevel: 12,
         animationMode: "flyTo",
         animationDuration: 1000,
       });
     } catch {
-      if (mounted.current) {
+      if (mountedRef.current) {
         Alert.alert(
           "Unable to find your location",
           "Check that location services are on and try again.",
@@ -89,8 +88,8 @@ export const useCenterOnUser = (camera: RefObject<Camera | null>) => {
       }
     } finally {
       clearTimeout(timeout);
-      busy.current = false;
-      if (mounted.current) setLocating(false);
+      busyRef.current = false;
+      if (mountedRef.current) setLocating(false);
     }
   };
 

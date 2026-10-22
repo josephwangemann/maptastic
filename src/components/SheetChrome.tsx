@@ -38,14 +38,14 @@ export const Backdrop = (props: BottomSheetBackdropProps) => {
   );
 };
 
-// Keep the native view opaque for hit testing; no background means no visual dimming.
+// Preserve hit testing without dimming the map.
 export const ClearBackdrop = ({ style }: BottomSheetBackdropProps) => {
   const { close } = useBottomSheet();
   return (
     <Pressable
       style={style}
       accessibilityRole="button"
-      accessibilityLabel="Dismiss waypoint details"
+      accessibilityLabel="Dismiss waypoint sheet"
       onPress={() => close()}
     />
   );
